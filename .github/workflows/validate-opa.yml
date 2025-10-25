@@ -1,0 +1,43 @@
+name: Validate Bicep with OPA
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install OPA
+      run: |
+        curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+        chmod +x opa
+        sudo mv opa /usr/local/bin/
+    
+    - name: Install Bicep CLI
+      run: |
+        curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+        chmod +x ./bicep
+        sudo mv ./bicep /usr/local/bin/bicep
+    
+    - name: Build Bicep to JSON
+      run: |
+        bicep build main.bicep --outfile main.json
+    
+    - name: Validate with OPA
+      run: |
+        opa eval --data policy.rego --input main.json --format pretty "data.bicep.storage.deny"
+        if [ $(opa eval --data policy.rego --input main.json --format raw "data.bicep.storage.allow") == "true" ]; then
+          echo "✅ OPA validation passed - No policy violations found"
+          exit 0
+        else
+          echo "❌ OPA validation failed - Policy violations detected:"
+          opa eval --data policy.rego --input main.json --format pretty "data.bicep.storage.deny"
+          exit 1
+        fi
