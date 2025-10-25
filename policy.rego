@@ -1,14 +1,14 @@
 package bicep.storage
 
 # Deny storage accounts that don't have encryption enabled
-deny[msg] {
+deny contains msg if {
     resource := input.resources[_]
     resource.type == "Microsoft.Storage/storageAccounts"
     not resource.properties.encryption.services.blob.enabled
     msg := sprintf("Storage account '%s' must have blob encryption enabled", [resource.name])
 }
 
-deny[msg] {
+deny contains msg if {
     resource := input.resources[_]
     resource.type == "Microsoft.Storage/storageAccounts"
     not resource.properties.encryption.services.file.enabled
@@ -16,7 +16,7 @@ deny[msg] {
 }
 
 # Deny storage accounts that don't enforce HTTPS
-deny[msg] {
+deny contains msg if {
     resource := input.resources[_]
     resource.type == "Microsoft.Storage/storageAccounts"
     not resource.properties.supportsHttpsTrafficOnly
@@ -24,6 +24,6 @@ deny[msg] {
 }
 
 # Allow if no deny rules are triggered
-allow {
+allow if {
     count(deny) == 0
 }
