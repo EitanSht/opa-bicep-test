@@ -4,19 +4,11 @@ A small test repository demonstrating how to use Open Policy Agent (OPA) to vali
 
 ## What this repo is
 
-This repository contains example Bicep templates and OPA Rego policy files to experiment with policy-as-code for Azure infrastructure. The goal is to provide a minimal, easy-to-follow starting point for:
+This repository contains an example storage account Bicep template (`main.bicep`), the compiled ARM template artifact (`artifacts/main.json`), and an accompanying OPA Rego policy (`policy.rego`). It is intended to be a minimal, easy-to-follow starting point for:
 
 - Writing Bicep modules for Azure resources
 - Creating Rego policies that evaluate those Bicep templates (or the deployed ARM JSON)
 - Running policy checks locally or as part of CI
-
-## Contents
-
-- /bicep - example Bicep templates
-- /policies - OPA Rego policies and tests
-- /scripts - helper scripts for running validation
-
-(If any of these directories are not present yet, they are planned locations for the files.)
 
 ## Requirements
 
@@ -27,21 +19,27 @@ This repository contains example Bicep templates and OPA Rego policy files to ex
 ## Quick start
 
 1. Install required tools (Azure CLI, Bicep, OPA)
-2. Build or compile your Bicep template:
+2. Build or compile the Bicep template (outputting to the tracked artifact directory):
 
-   bicep build ./bicep/main.bicep
+   ```bash
+   bicep build ./main.bicep --outfile ./artifacts/main.json
+   ```
 
 3. Run OPA against the generated ARM JSON (or against the templates if you convert them):
 
-   opa eval --input ./bicep/main.json --data ./policies 'data.example.allow'
+   ```bash
+   opa eval --input ./artifacts/main.json --data ./policy.rego 'data.bicep.storage.allow'
+   ```
 
 Adjust the command to match your policy entrypoint.
 
 ## Running tests
 
-If Rego unit tests are present in the /policies directory you can run them with the OPA test command:
+If Rego unit tests are added in the future you can run them with the OPA test command. For example, if tests live alongside the policy file:
 
-   opa test ./policies
+```bash
+opa test ./policy.rego
+```
 
 ## Contributing
 
