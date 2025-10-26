@@ -10,11 +10,11 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
   kind: 'StorageV2'
   properties: {
-    supportsHttpsTrafficOnly: false
+    supportsHttpsTrafficOnly: true
     encryption: {
       services: {
         blob: {
-          enabled: false
+          enabled: true
         }
         file: {
           enabled: true
